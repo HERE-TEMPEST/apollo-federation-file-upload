@@ -169,16 +169,16 @@ export default class FileUploadDataSource extends RemoteGraphQLDataSource {
     args: GraphQLDataSourceProcessOptions,
     fileVariables: FileVariablesTuple[],
   ): ProcessResult {
-    const { context, request } = args;
+    const { context } = args;
     const form = new FormData();
 
-    const variables = cloneDeep(request.variables || {});
+    const variables = cloneDeep(args.request.variables || {});
     fileVariables.forEach(([variableName]: FileVariablesTuple): void => {
       set(variables, variableName, null);
     });
 
     const operations = JSON.stringify({
-      query: request.query,
+      query: args.request.query,
       variables,
     });
 
@@ -221,7 +221,7 @@ export default class FileUploadDataSource extends RemoteGraphQLDataSource {
     }
 
     const headers = {
-      ...Object.fromEntries(request?.http?.headers || []),
+      ...Object.fromEntries(args.request?.http?.headers || []),
       ...form.getHeaders(),
     };
 
@@ -247,7 +247,11 @@ export default class FileUploadDataSource extends RemoteGraphQLDataSource {
     // see:
     // - https://github.com/apollographql/federation/pull/1906
     // - https://github.com/profusion/apollo-federation-file-upload/issues/52#issuecomment-1148946002
-    request.http = httpRequest as Exclude<typeof request.http, undefined>;
+    // eslint-disable-next-line no-param-reassign
+    args.request.http = httpRequest as Exclude<
+      typeof args.request.http,
+      undefined
+    >;
 
     let httpResponse: Response | undefined;
 
@@ -265,7 +269,11 @@ export default class FileUploadDataSource extends RemoteGraphQLDataSource {
       };
 
       if (typeof this.didReceiveResponse === 'function') {
-        return this.didReceiveResponse({ context, request, response });
+        return this.didReceiveResponse({
+          context,
+          request: args.request,
+          response,
+        });
       }
 
       return response;
