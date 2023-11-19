@@ -4,7 +4,7 @@
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
   "author": "Here Tempest",
-  "repository": "https://github.com/HERE-TEMPEST/apollo-federation-file-upload",
+  "repository": "git@github.com:HERE-TEMPEST/apollo-federation-file-upload.git",
   "license": "MIT",
   "private": false,
   "keywords": [
