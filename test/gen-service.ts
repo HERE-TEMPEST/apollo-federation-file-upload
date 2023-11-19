@@ -1,11 +1,8 @@
 import { ApolloServer, gql } from 'apollo-server-express';
 import { buildSubgraphSchema } from '@apollo/subgraph';
-import GraphQLUpload, {
-  type FileUpload,
-  // eslint-disable-next-line import/extensions
-} from 'graphql-upload/GraphQLUpload.js';
+import { type FileUpload } from 'graphql-upload-ts';
 // eslint-disable-next-line import/extensions
-import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.js';
+import { graphqlUploadExpress, GraphQLUpload } from 'graphql-upload-ts';
 import { GraphQLResolverMap } from 'apollo-graphql';
 import {
   ApolloServerPluginInlineTraceDisabled,
