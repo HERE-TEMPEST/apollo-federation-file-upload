@@ -10,6 +10,7 @@ import { isObject } from '@apollo/gateway/dist/utilities/predicates';
 import cloneDeep from 'lodash.clonedeep';
 import set from 'lodash.set';
 import type { FetchInterface, FetchOptions } from 'make-fetch-happen';
+import type { FetcherHeaders } from '@apollo/utils.fetcher';
 
 import FormData from './FormData';
 
@@ -202,10 +203,21 @@ export default class FileUploadDataSource extends RemoteGraphQLDataSource {
     form.append('map', JSON.stringify(fileMap));
     await this.addDataHandler(form, resolvedFiles);
 
+    const requestHeaders = new Headers();
+
     // This must happen before constructing the request headers
     // otherwise any custom headers set in willSendRequest are ignored
     if (this.willSendRequest) {
-      await this.willSendRequest(args);
+      await this.willSendRequest({
+        ...args,
+        request: {
+          ...args.request,
+          http: {
+            ...args.request.http!,
+            headers: requestHeaders as unknown as FetcherHeaders,
+          },
+        },
+      });
     }
 
     const headers = {
