@@ -169,16 +169,17 @@ export default class FileUploadDataSource extends RemoteGraphQLDataSource {
     args: GraphQLDataSourceProcessOptions,
     fileVariables: FileVariablesTuple[],
   ): ProcessResult {
-    const { context } = args;
+    const { context, request } = args;
     const form = new FormData();
 
-    const variables = cloneDeep(args.request.variables || {});
+    const variables = cloneDeep(request.variables || {});
+
     fileVariables.forEach(([variableName]: FileVariablesTuple): void => {
       set(variables, variableName, null);
     });
 
     const operations = JSON.stringify({
-      query: args.request.query,
+      query: request.query,
       variables,
     });
 
@@ -193,7 +194,9 @@ export default class FileUploadDataSource extends RemoteGraphQLDataSource {
           i: number,
         ): Promise<FileUpload> => {
           const fileUpload: FileUpload = await file;
+
           fileMap[i] = [`variables.${variableName}`];
+
           return fileUpload;
         },
       ),
@@ -203,10 +206,11 @@ export default class FileUploadDataSource extends RemoteGraphQLDataSource {
     form.append('map', JSON.stringify(fileMap));
     await this.addDataHandler(form, resolvedFiles);
 
-    const requestHeaders = new Headers();
-
     // This must happen before constructing the request headers
     // otherwise any custom headers set in willSendRequest are ignored
+
+    const requestHeaders = new Headers();
+
     if (this.willSendRequest) {
       await this.willSendRequest({
         ...args,
@@ -221,7 +225,8 @@ export default class FileUploadDataSource extends RemoteGraphQLDataSource {
     }
 
     const headers = {
-      ...Object.fromEntries(args.request?.http?.headers || []),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ...Object.fromEntries(requestHeaders as any),
       ...form.getHeaders(),
     };
 
